@@ -10,23 +10,23 @@ editor_options:
 
 * **Question 1:** What is the purpose of using cross-validation when fitting a random forest model?
   
-  + Answer here 
-
+  + Random forest models include hyperparameters such as the number of predictors that are sampled at each split. Through the process of tuning, hyperparameter values for random forest models can be estimated and selected for the best overall combination in order to produce the best model (e.g. most accurate model, model that is best at generalizing to unseen data). Cross-validation is an important part of the tuning process because it allows for different combinations of hyperparameters to be applied to different subsets of training data before ultimately sending the best model to the test data. Therefore, cross-validation can help avoid overfitting in the process of tuning random forest models.
+  
 * **Question 2:** Describe the bagged tree algorithm.
   
-  + Answer here 
+  + 'Bagging' refers to bootstrap aggregation. 'Bootstrapping' refers to resampling (either from data or a fitted model). In bootstrapping, multiple resamples are taken from an original data sample. Then, for the bagged tree algorithm, tree models are fit to each resample. From there, a prediction can be generated for each tree. At the end, the predictions are combined in some meaningful way to give a final prediction. For example, for a regression tree you can combine predictions through averaging. For classification trees, you could use majority rule to identify the most common prediction from all trees from the bootstrapping step.
   
 * **Question 3:** What is meant by a general linear model?
 
-  + Answer here 
+  + General linear model (GLM) refers to a group of models that can all use a linear equation to express a continuous outcome. For example, both simple and multiple linear regression models are GLMs, as well as ANOVAs. However, for GLMs, normal distribution is assumed, while generalized linear models can handle additional models such as logistic regression because they don't depend on normal distribution specifically. 
   
 * **Question 4:** When fitting a multiple linear regression model, what does adding an interaction term do? That is, what does it allow the model to do differently as compared to when it is not included in the model?
 
-  + Answer here
+  + Adding an interaction effect means that you are investigating if the effect of one variable depends on the value of a different variable. In an expression, the interaction term would include two predictor variables multiplied together with the beta term. When the interaction term is NOT included, you can still investigate things like main effects (beta term multiplied by a predictor variable) e.g. if you want to discuss the effects of different predictors--but you would only be able to see if the predictors have main effects, not if they depend on each other. Including either/both main effects and interaction terms can make the model more flexible overall.
   
 * **Question 5:** Why do we split our data into a training and test set?
 
-  + Answer here 
+  + We split data into training and test sets because we want a model that is generalizeable and applicable to data it has yet to see. If you do not reserve part of your data as test data and thus train your model on the entirety of your data set, you have no way of knowing if your model only works really well with the data you've already given it, and not as well with similar data that it hasn't seen. This can be problematic assuming that you are creating a model to work with real-world data: you want to create something that can be applied to future data that is unknown in order to continue making valid predictions within the context of the model. If you use training data for your model and it works really well, but when run on test data your model doesn't perform as well, that's a cue to re-tune parameters/hyperparameters and try to get more accurate output. 
 
 ## Task 2: Data Prep
 
