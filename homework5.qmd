@@ -58,7 +58,9 @@ According to the tibble created in the previous step, Heart Disease is an intege
 **Does this make sense? Why or why not.**
 No, this does not make sense. It is true that Heart Disease includes numbers like in quantitative data, but the numbers are just 0 and 1 and evidenced here:
 ```{r}
+
 print(data$HeartDisease)
+
 ```
 This indicates that binary form is being used to indicate that Heart Disease is categorical rather than quantitative. This is further confirmed by visiting the website provided in the homework ([here](https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction)) where it is stated that a 1 means heart disease is present and 0 means the patient is normal (no heart disease). 
 
@@ -112,5 +114,94 @@ test
 ```
 
 ## Task 5: OLS and LASSO
+
+### Question 1
+```{r}
+
+ols_mlr <- lm(Age ~ MaxHR + HeartDisease_factor + MaxHR * HeartDisease_factor, data = train)
+
+summary(ols_mlr)
+
+```
+
+### Question 2
+```{r}
+
+tested <- predict(ols_mlr, newdata = test)
+
+rmse_vec(test$Age, tested) #this is the RMSE value I want to report
+
+```
+
+### Question 3
+```{r}
+
+folds <- vfold_cv(train, 10)
+
+LASSO_recipe <- recipe(Age ~ MaxHR + HeartDisease_factor, data  = train) |>
+  step_normalize(all_numeric_predictors()) |>
+  step_dummy(HeartDisease_factor) |>
+  step_interact(~ MaxHR:starts_with("HeartDisease_factor_")) 
+  
+LASSO_recipe
+
+```
+
+### Question 4
+```{r}
+
+spec <- linear_reg(penalty = tune(), mixture = 1) |> #set appropriate spec
+  set_engine("glmnet")
+
+wfl <- workflow() |>
+  add_recipe(LASSO_recipe) |>
+  add_model(spec)
+
+wfl
+
+grid <- wfl |> #set appropriate grid
+  tune_grid(resamples = folds,
+            grid = grid_regular(penalty(), levels = 10))
+
+final_model <- grid |>
+  select_best(metric = "rmse") 
+
+final_wfl <- wfl |> #select final model
+  finalize_workflow(final_model) |>
+  fit(train)
+
+tidy(final_wfl) #report with tidy
+
+```
+
+### Question 5
+
+**Without looking at the RMSE calculations, would you expect the RMSE calculations to be roughly the same or different? Justify your answer using output from your LASSO model.**
+
+Judging by the LASSO model output, I'd expect the RMSE calculations to be roughly the same, given the extremely small penalties for the LASSO model. Because the penalties are so small, LASSO likely did not shrink the model coefficients much. So, RMSE is probably similar across the models. 
+### Question 6
+
+Now compare the RMSE between your OLS and LASSO model and show that the RMSE
+calculations were roughly the same.
+```{r}
+
+tested <- predict(ols_mlr, newdata = test)
+
+OLS <- rmse_vec(test$Age, tested) 
+
+LASSO <- final_wfl |>
+  predict(test) |>
+  pull() |>
+  rmse_vec(truth = test$Age)
+
+OLS
+LASSO
+
+```
+
+### Question 7
+
+**Why are the RMSE calculations roughly the same if the coefficients for each model are
+different?**
 
 ## Task 6: Logistic Regression
