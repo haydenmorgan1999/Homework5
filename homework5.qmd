@@ -98,6 +98,18 @@ more appropriate? Justify your answer.**
 Based on visual evidence, I think an interaction model may be more appropriate for this data than an additive model. An interaction model assumes that the effect of one predictor (e.g. maximum HR) depends on the level of a different predictor (e..g having heart disease). In this graph, it is clear that the slope between age and maximum HR for those without heart disease is much more negative than the slope between age and maximum HR for those WITH heart disease, so this indicates that there may be other factors (like max HR and heart disease interacting with each other) at play than just maximum HR and age. If an additive model was indicated instead, I would expect there to be less difference in the slopes of the two heart disease groups.
 
 ## Task 4: Testing and Training 
+```{r}
+
+set.seed(101)
+
+new_heart_split <- initial_split(new_heart, prop = 0.8)
+train <- training(new_heart_split)
+test <- testing(new_heart_split)
+
+train
+test
+
+```
 
 ## Task 5: OLS and LASSO
 
