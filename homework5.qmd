@@ -1,0 +1,85 @@
+---
+title: "Homework 5"
+author: "Hayden Morgan"
+format: pdf
+editor_options: 
+  chunk_output_type: console
+---
+
+## Task 1: Conceptual Questions
+
+* **Question 1:** What is the purpose of using cross-validation when fitting a random forest model?
+  
+  + Answer here 
+
+* **Question 2:** Describe the bagged tree algorithm.
+  
+  + Answer here 
+  
+* **Question 3:** What is meant by a general linear model?
+
+  + Answer here 
+  
+* **Question 4:** When fitting a multiple linear regression model, what does adding an interaction term do? That is, what does it allow the model to do differently as compared to when it is not included in the model?
+
+  + Answer here
+  
+* **Question 5:** Why do we split our data into a training and test set?
+
+  + Answer here 
+
+## Task 2: Data Prep
+
+### packages and data 
+```{r, message=FALSE, warning=FALSE}
+library("tidyverse")
+library("tidymodels")
+library("caret")
+library("yardstick")
+
+data <- read.csv("data/heart.csv")
+
+data <- as.tibble(data)
+
+data #proof of data as tibble 
+```
+
+### Question 1
+```{r}
+
+summary(data)
+
+```
+
+**What type of variable (in R) is Heart Disease? Categorical or Quantitative?**
+
+According to the tibble created in the previous step, Heart Disease is an integer in R, meaning it is quantitative. 
+
+**Does this make sense? Why or why not.**
+No, this does not make sense. It is true that Heart Disease includes numbers like in quantitative data, but the numbers are just 0 and 1 and evidenced here:
+```{r}
+print(data$HeartDisease)
+```
+This indicates that binary form is being used to indicate that Heart Disease is categorical rather than quantitative. This is further confirmed by visiting the website provided in the homework ([here](https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction)) where it is stated that a 1 means heart disease is present and 0 means the patient is normal (no heart disease). 
+
+Because of this binary data, treating Heart Disease like integer data and performing quantitative data analysis will not give us the insights desired for the data set. Rather, Heart Disease should be treated as categorical data in order for us to complete predictions and inferences on the data set that make sense in the context of the data. 
+
+### Question 2
+```{r}
+
+new_heart <- data |> 
+  mutate(HeartDisease = factor(HeartDisease)) |>
+  rename(HeartDisease_factor = HeartDisease) |>
+  select(-ST_Slope)
+
+colnames(new_heart)
+
+```
+
+## Task 3: EDA
+
+## Task 4: Testing and Training 
+
+## Task 5: OLS and LASSO
+
+## Task 6: Logistic Regression
