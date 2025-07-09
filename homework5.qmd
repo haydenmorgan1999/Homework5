@@ -94,8 +94,7 @@ Disease and Max HR")+
 
 ### Question 2
 
-**Based on visual evidence, do you think an interaction model or an additive model is
-more appropriate? Justify your answer.**
+**Based on visual evidence, do you think an interaction model or an additive model is more appropriate? Justify your answer.**
 
 Based on visual evidence, I think an interaction model may be more appropriate for this data than an additive model. An interaction model assumes that the effect of one predictor (e.g. maximum HR) depends on the level of a different predictor (e..g having heart disease). In this graph, it is clear that the slope between age and maximum HR for those without heart disease is much more negative than the slope between age and maximum HR for those WITH heart disease, so this indicates that there may be other factors (like max HR and heart disease interacting with each other) at play than just maximum HR and age. If an additive model was indicated instead, I would expect there to be less difference in the slopes of the two heart disease groups.
 
@@ -197,11 +196,88 @@ LASSO <- final_wfl |>
 OLS
 LASSO
 
+#the RMSEs are are roughly the same, indeed 
+
 ```
 
 ### Question 7
 
-**Why are the RMSE calculations roughly the same if the coefficients for each model are
-different?**
+**Why are the RMSE calculations roughly the same if the coefficients for each model are different?**
+
+*answer goes here*
 
 ## Task 6: Logistic Regression
+
+### Question 1
+```{r}
+
+set.seed(101)
+
+split_log <- initial_split(new_heart, prop = 0.8)
+train_log <- training(split_log)
+test_log <- testing(split_log)
+folds_log <- vfold_cv(train_log, 10)
+
+log1_rec <- recipe(HeartDisease_factor ~ Age, data = train_log) |>
+  step_normalize(all_numeric()) 
+log2_rec <- recipe(HeartDisease_factor ~ Age + MaxHR, data = train_log) |>
+  step_normalize(all_numeric()) 
+
+spec_log <- logistic_reg() |>
+  set_engine("glm")
+
+log1_wfl <- workflow() |>
+  add_recipe(log1_rec) |>
+  add_model(spec_log)
+log2_wfl <- workflow() |>
+  add_recipe(log2_rec) |>
+  add_model(spec_log)
+
+log1_fit <- log1_wfl |>
+  fit_resamples(folds_log, metrics = metric_set(accuracy, mn_log_loss))
+log2_fit <- log2_wfl |>
+  fit_resamples(folds_log, metrics = metric_set(accuracy, mn_log_loss))
+
+rbind(log1_fit |> collect_metrics(),
+      log2_fit |> collect_metrics()) |>
+  mutate(Model = c("Model1", "Model1", "Model2", "Model2")) |>
+  select(Model, everything())
+
+```
+
+**Identify your best performing model. Justify why this is your best performing model and provide a basic summary of it.**
+
+The best performing model is Model 2. *explanation here*
+
+### Question 2
+```{r}
+
+log2_train_fit <- log2_wfl |>
+  fit(train_log) 
+
+conf_mat(train_log |>
+           mutate(estimate = log2_train_fit |>
+                    predict(train_log) |>
+                    pull()),
+         HeartDisease_factor,
+         estimate)
+
+```
+
+### Question 3
+
+**Next, identify the values of sensitivity and specificity, and interpret them in the context of the problem.**
+
+Sensitivity is a true positive rate, or the probability of a positive test result that is truly positive. Based on the results of the confusion matrix, the sensitivity of Model 2 is as follows:
+
+number of true positives / (number of true positives + number of false negatives) = 
+
+325 / (325 + 93) = 0.7775
+
+In the context of this data set/problem, this means that the logistic regression model Model 2 *more stuff here*
+
+Specificity is a true negative rate, or the probability of a negative test result that is truly negative. Based on the results of the confusion matrix, the specificity of Model 2 is as follows:
+
+numer of true negatives / (number of true negatives + number of false positives) = 
+
+178 / (178 + 138) = 0.5633
