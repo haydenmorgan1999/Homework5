@@ -8,6 +8,8 @@ editor_options:
 
 ## Task 1: Conceptual Questions
 
+Tyoe each question as part of a bulleted list and answer each question underneath each bullet.
+
 * **Question 1: What is the purpose of using cross-validation when fitting a random forest model?**
   
   + Random forest models include hyperparameters such as the number of predictors that are sampled at each split. Through the process of tuning, hyperparameter values for random forest models can be estimated and selected for the best overall combination in order to produce the best model (e.g. most accurate model, model that is best at generalizing to unseen data). Cross-validation is an important part of the tuning process because it allows for different combinations of hyperparameters to be applied to different subsets of training data before ultimately sending the best model to the test data. Therefore, cross-validation can help avoid overfitting in the process of tuning random forest models.
@@ -31,6 +33,10 @@ editor_options:
 ## Task 2: Data Prep
 
 ### packages and data 
+
+First, create a sub-header titled packages and data and library the tidyverse, tidymodels, caret, and the yardstick package. We will need these our homework. In the code chunk setting, suppress all messages associated with calling these packages.
+
+In the same code chunk, read in your data set as a tibble.
 ```{r, message=FALSE, warning=FALSE}
 library("tidyverse")
 library("tidymodels")
@@ -45,6 +51,8 @@ data #proof of data as tibble
 ```
 
 ### Question 1
+
+Run and report summary() on your data set.
 ```{r}
 
 summary(data)
@@ -56,6 +64,7 @@ summary(data)
 According to the tibble created in the previous step, Heart Disease is an integer in R, meaning it is quantitative. 
 
 **Does this make sense? Why or why not.**
+
 No, this does not make sense. It is true that Heart Disease includes numbers like in quantitative data, but the numbers are just 0 and 1 and evidenced here:
 ```{r}
 
@@ -69,26 +78,31 @@ Because of this binary data, treating Heart Disease like integer data and perfor
 ### Question 2
 ```{r}
 
-new_heart <- data |> 
-  mutate(HeartDisease = factor(HeartDisease)) |>
-  rename(HeartDisease_factor = HeartDisease) |>
-  select(-ST_Slope)
+new_heart <- data |> #new data set is new_heart 
+  mutate(HeartDisease = factor(HeartDisease)) |> #changed data type, 
+  #removed old HeartDisease
+  rename(HeartDisease_factor = HeartDisease) |> #renamed HeartDisease
+  select(-ST_Slope) #remove ST_Slope
 
-colnames(new_heart) #showing that HeartDisease has been replaced and there is no more ST_Slope
+colnames(new_heart) #showing that HeartDisease has been replaced 
+#and there is no more ST_Slope
 
 ```
 
 ## Task 3: EDA
 
 ### Question 1
+
+We are going to model someone’s age (our response variable) as a function of heart disease and their max heart rate. First, create the appropriate scatterplot to visualize this relationship.
 ```{r}
 
-ggplot(new_heart, aes(x = MaxHR, y = Age, color = HeartDisease_factor))+
+ggplot(new_heart, aes(x = MaxHR, y = Age, color = HeartDisease_factor))+ 
   geom_point()+
-  geom_smooth(method = "lm", se = FALSE)+
-  labs(x = "Maximum Heart Rate (bpm)", y = "Age (Years)", title = "Age as a Function of Heart
-Disease and Max HR")+
-  scale_color_viridis_d(name = "Has Heart Disease", labels = c("False", "True"))
+  geom_smooth(method = "lm", se = FALSE)+ #add a line and remove SE bars
+  labs(x = "Maximum Heart Rate (bpm)", y = "Age (Years)", #add labs 
+  title = "Age as a Function of Heart Disease and Max HR")+
+  scale_color_viridis_d(name = "Has Heart Disease", labels = c("False", "True")) 
+  #colorblind friendly palette
   
 ```
 
@@ -99,11 +113,13 @@ Disease and Max HR")+
 Based on visual evidence, I think an interaction model may be more appropriate for this data than an additive model. An interaction model assumes that the effect of one predictor (e.g. maximum HR) depends on the level of a different predictor (e..g having heart disease). In this graph, it is clear that the slope between age and maximum HR for those without heart disease is much more negative than the slope between age and maximum HR for those WITH heart disease, so this indicates that there may be other factors (like max HR and heart disease interacting with each other) at play than just maximum HR and age. If an additive model was indicated instead, I would expect there to be less difference in the slopes of the two heart disease groups.
 
 ## Task 4: Testing and Training 
+
+Split your data into a training and test set.
 ```{r}
 
-set.seed(101)
+set.seed(101) #seed to 1-1
 
-new_heart_split <- initial_split(new_heart, prop = 0.8)
+new_heart_split <- initial_split(new_heart, prop = 0.8) #80/20 split
 train <- training(new_heart_split)
 test <- testing(new_heart_split)
 
@@ -115,18 +131,22 @@ test
 ## Task 5: OLS and LASSO
 
 ### Question 1
+
+First fit
+an interaction model (named ols_mlr) with age as your response, and max heart rate + heart disease as your explanatory variables using the training data set using ordinary least squares regression.
 ```{r}
 
-ols_mlr <- lm(Age ~ MaxHR + HeartDisease_factor + MaxHR * HeartDisease_factor, data = train)
+ols_mlr <- lm(Age ~ MaxHR + HeartDisease_factor + MaxHR * HeartDisease_factor, 
+              data = train)
 
-summary(ols_mlr)
+summary(ols_mlr) #report summary output
 
 ```
 
 ### Question 2
 ```{r}
 
-tested <- predict(ols_mlr, newdata = test)
+tested <- predict(ols_mlr, newdata = test) #test on testing data set 
 
 rmse_vec(test$Age, tested) #this is the RMSE value I want to report
 
@@ -135,14 +155,14 @@ rmse_vec(test$Age, tested) #this is the RMSE value I want to report
 ### Question 3
 ```{r}
 
-folds <- vfold_cv(train, 10)
+folds <- vfold_cv(train, 10) #CV, 10 fold
 
 LASSO_recipe <- recipe(Age ~ MaxHR + HeartDisease_factor, data  = train) |>
-  step_normalize(all_numeric_predictors()) |>
+  step_normalize(all_numeric_predictors()) |> #standardize predictors
   step_dummy(HeartDisease_factor) |>
   step_interact(~ MaxHR:starts_with("HeartDisease_factor_")) 
   
-LASSO_recipe
+LASSO_recipe #print recipe 
 
 ```
 
@@ -178,6 +198,7 @@ tidy(final_wfl) #report with tidy
 **Without looking at the RMSE calculations, would you expect the RMSE calculations to be roughly the same or different? Justify your answer using output from your LASSO model.**
 
 Judging by the LASSO model output, I'd expect the RMSE calculations to be roughly the same, given the extremely small penalties for the LASSO model. Because the penalties are so small, LASSO likely did not shrink the model coefficients much. So, RMSE is probably similar across the models. 
+
 ### Question 6
 
 Now compare the RMSE between your OLS and LASSO model and show that the RMSE
@@ -189,7 +210,7 @@ tested <- predict(ols_mlr, newdata = test)
 OLS <- rmse_vec(test$Age, tested) 
 
 LASSO <- final_wfl |>
-  predict(test) |>
+  predict(test) |> #eval on test data 
   pull() |>
   rmse_vec(truth = test$Age)
 
@@ -204,11 +225,15 @@ LASSO
 
 **Why are the RMSE calculations roughly the same if the coefficients for each model are different?**
 
-*answer goes here*
+The LASSO model can shrink coefficients in a model, e.g. if some predictors are irrelevant, etc. Given the small LASSO penalties and the fact that coefficients in LASSO were not near 0, both the LASSO and OLS models likely contain predictors that are actually useful to the context of the data set and data analysis. Therefore, because there was little difference in the structure of the models even after LASSO, this could explain why the RMSE calculations are roughly the same: the LASSO model did not find it necessary to drastically change the anatomy of the model compared to OLS so their outcomes are very similar. 
 
 ## Task 6: Logistic Regression
 
 ### Question 1
+
+Propose two different logistic regression models with heart disease as our response.
+
+Fit those models on the training set, using repeated CV.
 ```{r}
 
 set.seed(101)
@@ -247,9 +272,11 @@ rbind(log1_fit |> collect_metrics(),
 
 **Identify your best performing model. Justify why this is your best performing model and provide a basic summary of it.**
 
-The best performing model is Model 2. *explanation here*
+The best performing model is Model 2. According to the tibble produced, Model 2 has both a larger accuracy and a smaller log loss than Model 1, both of which are favorable in this context. Model 2 is a more complex model than Model 1, including both Age and MaxHR whereas Model 1 just includes Age. In this case, it looks like adding more predictors to explain data trends makes the model better. This is not always true in data analysis scenarios, sometimes a simpler model ends up fitting data better- but not in this case. 
 
 ### Question 2
+
+Lastly, check how well your chosen model does on the test set using the confusionMatrix() function.
 ```{r}
 
 log2_train_fit <- log2_wfl |>
@@ -274,10 +301,14 @@ number of true positives / (number of true positives + number of false negatives
 
 325 / (325 + 93) = 0.7775
 
-In the context of this data set/problem, this means that the logistic regression model Model 2 *more stuff here*
+In the context of this data set/problem, this means that the logistic regression model Model 2 has a 77.75% chance of positively identifying that heart disease is present when the patient does actually have heart disease. 
 
 Specificity is a true negative rate, or the probability of a negative test result that is truly negative. Based on the results of the confusion matrix, the specificity of Model 2 is as follows:
 
-numer of true negatives / (number of true negatives + number of false positives) = 
+number of true negatives / (number of true negatives + number of false positives) = 
 
 178 / (178 + 138) = 0.5633
+
+In the context of this data set/problem, this means that the logistic regression model Model 2 has a 56.33% chance of NOT finding heart disease when the patient, in fact, does not have heart disease.
+
+So, overall, the model is pretty good at identifying if a patient has heart disease when they do, but not as good at identifying if the patient does NOT have heart disease when they don't. The model is more likely to return false negatives than false positives. 
