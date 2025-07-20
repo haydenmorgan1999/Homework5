@@ -16,7 +16,7 @@ Tyoe each question as part of a bulleted list and answer each question underneat
   
 * **Question 2: Describe the bagged tree algorithm.**
   
-  + 'Bagging' refers to bootstrap aggregation. 'Bootstrapping' refers to resampling (either from data or a fitted model). In bootstrapping, multiple resamples are taken from an original data sample. Then, for the bagged tree algorithm, tree models are fit to each resample. From there, a prediction can be generated for each tree. At the end, the predictions are combined in some meaningful way to give a final prediction. For example, for a regression tree you can combine predictions through averaging. For classification trees, you could use majority rule to identify the most common prediction from all trees from the bootstrapping step.
+  + 'Bagging' refers to bootstrap aggregation. 'Bootstrapping' refers to resampling (either from data or a fitted model). In bootstrapping, multiple resamples are taken from an original data sample. Then, for the bagged tree algorithm, tree models are fit to each resample. From there, a prediction can be generated for each tree. At the end, the predictions are combined in some meaningful way to give a final prediction. For example, for continuous numerical responses you can combine predictions through averaging. For classification trees, you could use majority rule to identify the most common prediction from all trees from the bootstrapping step.
   
 * **Question 3: What is meant by a general linear model?**
 
@@ -24,7 +24,7 @@ Tyoe each question as part of a bulleted list and answer each question underneat
   
 * **Question 4: When fitting a multiple linear regression model, what does adding an interaction term do? That is, what does it allow the model to do differently as compared to when it is not included in the model?**
 
-  + Adding an interaction effect means that you are investigating if the effect of one variable depends on the value of a different variable. In an expression, the interaction term would include two predictor variables multiplied together with the beta term. When the interaction term is NOT included, you can still investigate things like main effects (beta term multiplied by a predictor variable) e.g. if you want to discuss the effects of different predictors--but you would only be able to see if the predictors have main effects, not if they depend on each other. Including either/both main effects and interaction terms can make the model more flexible overall.
+  + Adding an interaction effect means that you are investigating if the effect of one variable depends on the value/level of a different variable. In an expression, the interaction term would include two predictor variables multiplied together with the beta term. When the interaction term is NOT included, you can still investigate things like main effects (beta term multiplied by a predictor variable) e.g. if you want to discuss the effects of different predictors--but you would only be able to see if the predictors have main effects, not if they depend on each other. Including either/both main effects and interaction terms can make the model more flexible/complex overall. There is a risk of overfitting the model, though, if an interaction term is included when it is not needed.
   
 * **Question 5: Why do we split our data into a training and test set?**
 
@@ -38,6 +38,7 @@ First, create a sub-header titled packages and data and library the tidyverse, t
 
 In the same code chunk, read in your data set as a tibble.
 ```{r, message=FALSE, warning=FALSE}
+#suppressed messages/warnings in code chunk
 library("tidyverse")
 library("tidymodels")
 library("caret")
@@ -117,7 +118,7 @@ Based on visual evidence, I think an interaction model may be more appropriate f
 Split your data into a training and test set.
 ```{r}
 
-set.seed(101) #seed to 1-1
+set.seed(101) #seed to 101
 
 new_heart_split <- initial_split(new_heart, prop = 0.8) #80/20 split
 train <- training(new_heart_split)
@@ -132,8 +133,7 @@ test
 
 ### Question 1
 
-First fit
-an interaction model (named ols_mlr) with age as your response, and max heart rate + heart disease as your explanatory variables using the training data set using ordinary least squares regression.
+First fit an interaction model (named ols_mlr) with age as your response, and max heart rate + heart disease as your explanatory variables using the training data set using ordinary least squares regression.
 ```{r}
 
 ols_mlr <- lm(Age ~ MaxHR + HeartDisease_factor + MaxHR * HeartDisease_factor, 
@@ -197,7 +197,7 @@ tidy(final_wfl) #report with tidy
 
 **Without looking at the RMSE calculations, would you expect the RMSE calculations to be roughly the same or different? Justify your answer using output from your LASSO model.**
 
-Judging by the LASSO model output, I'd expect the RMSE calculations to be roughly the same, given the extremely small penalties for the LASSO model. Because the penalties are so small, LASSO likely did not shrink the model coefficients much. So, RMSE is probably similar across the models. 
+Judging by the LASSO model output, I'd expect the RMSE calculations to be roughly the same, given the extremely small penalties for the LASSO model. Because the penalties are so small, LASSO likely did not shrink the model coefficients much. So, RMSE is probably similar across the models.
 
 ### Question 6
 
